@@ -1,0 +1,7 @@
+#
+# Rebuild requirements.txt through the following:
+# pip-compile --generate-hashes --resolver=backtracking requirements.in > requirements.txt
+#
+
+dbt-core~=1.7
+dbt-bigquery~=1.7

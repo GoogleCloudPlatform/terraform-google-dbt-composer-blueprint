@@ -1,0 +1,58 @@
+[
+    {
+        "name": "timestamp",
+        "type": "TIMESTAMP"
+    },
+    {
+        "name": "resource",
+        "type": "STRUCT",
+        "fields": [
+            {
+                "name": "type",
+                "type": "STRING"
+            },
+            {
+                "name": "labels",
+                "type": "STRUCT",
+                "fields": [
+                    {
+                        "name": "project_id",
+                        "type": "STRING"
+                    },
+                    {
+                        "name": "location",
+                        "type": "STRING"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "protopayload_auditlog",
+        "type": "STRUCT",
+        "fields": [
+            {
+                "name": "metadataJson",
+                "type": "STRING"
+            },
+            {
+                "name": "resourceName",
+                "type": "STRING"
+            },
+            {
+                "name": "methodName",
+                "type": "STRING"
+            },
+            {
+                "name": "authenticationInfo",
+                "type": "STRUCT",
+                "fields": [
+                    {
+                        "name": "principalEmail",
+                        "type": "STRING"
+                    }
+                ]
+            }
+        ]
+    }
+]

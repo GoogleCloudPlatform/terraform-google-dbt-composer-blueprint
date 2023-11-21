@@ -1,0 +1,5 @@
+
+# Ignore terraform state and modules
+**/.terraform
+**/.terraform.lock.hcl
+**/terraform.tfstate*

@@ -1,0 +1,50 @@
+# Copyright 2023 Google LLC
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#     https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+
+# Pull previous version
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args: [ '-c', 'docker pull $_IMAGE_TAG || exit 0' ]
+
+# Build DBT containerised image.
+# Note the build-args being passed in. This bakes metadata
+# into the image itself, including the source (repository URL,
+# commit SHA, and path) and the build (build location and
+# reference). This allows for logging downstream metadata
+# about the source of the image.
+#
+- name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-f', 'dbt/Dockerfile',
+                   '--cache-from=$_IMAGE_TAG',
+                   '--build-arg=BUILD_REF=$BUILD_ID',
+                   '--build-arg=BUILD_LOCATION=$LOCATION',
+                   '--build-arg=SOURCE_URL=$_SOURCE_URL',
+                   '--build-arg=SOURCE_REF=$COMMIT_SHA',
+                   '--build-arg=SOURCE_PATH=examples/dbt_job',
+                   '-t', '$_IMAGE_TAG',
+                   'dbt' ]
+
+# Copy DAGs into airflow
+- name: 'gcr.io/cloud-builders/gsutil'
+  args: [ 'cp', 'dags/*.py',
+                '$_AIRFLOW_DAG_GCS_PREFIX' ]
+
+images: [ '$_IMAGE_TAG' ]
+
+substitutions:
+  _IMAGE_TAG: '${_REGISTRY_URL}/example-dbt-job:latest'
+options:
+  dynamicSubstitutions: true
