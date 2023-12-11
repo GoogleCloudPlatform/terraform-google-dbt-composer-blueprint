@@ -10,6 +10,17 @@ To deploy this example do the following from a Linux command line:
 
 2. Create a `terraform.tfvars` to provide values for `project_id`, `region`, `bq_location`, and `gcs_location`. Region is used for Cloud Composer and the artifact repository. BQ Location is used for the BigQuery storage location. GCS Location is used for the location of GCS buckets (multi-regional or single region).
 
+An example terraform.tfvars is as follows:
+```
+project_id="<your project-id>"
+
+# Use Belgium and EU buckets and EU datasets
+# (change as you'd like)
+region="europe-west1"
+bq_location="EU"
+gcs_location="eu"
+```
+
 3. Run `terraform apply`.
 
 ## Build and deploy the example DBT job
@@ -29,7 +40,7 @@ echo "Create your own dashboard is available at $(terraform output -raw lookerst
 gcloud builds submit --project $PROJECT_ID --substitutions "_SOURCE_URL=BaseSourceUrl,_REGISTRY_URL=${REGISTRY_URL},_AIRFLOW_DAG_GCS_PREFIX=${AIRFLOW_DAG_GCS_PREFIX}" .
 ```
 
-Replace BaseSourceURL with the URL where your source is hosted if you wish to have a link back to source. For automated Cloud Build (linked to a merge), this will
+Replace `BaseSourceURL` with the URL where your source is hosted if you wish to have a link back to source. For automated Cloud Build (linked to a merge), this will
 ensure all containers have a link back to the original source code.
 
 3. Visit the Airflow URL shown in step 1. The DBT dag deployed in step 2 should have already run and you can inspect its logs and status.

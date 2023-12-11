@@ -4,7 +4,7 @@
 
 ### Overview
 
-This module stands up an integrated DBT and Composer operation environment.
+This module stands up an integrated DBT and Composer operations environment.
 
 It does the following:
  * Applies required APIs and permissions in the project
@@ -13,13 +13,13 @@ It does the following:
  * Copies across DAG utilities for Composer
  * Exports audit logs for the project into a BigQuery project, including two materialized views and a view on top to support dashboards
 
-### Examples
-
-An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end-to-end example is included that shows using the DAG utilities and standing up a simple DBT job in Cloud Composer.
-
 ## Architecture
 
 <img alt="Architecture Diagram" src="docs/arch_diagram.png">
+
+## Examples
+
+An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end-to-end example is included that shows using the DAG utilities and standing up a simple DBT job in Cloud Composer.
 
 ## Cost
 
@@ -46,6 +46,7 @@ module "dbt_composer" {
   env_variables = {
     AIRFLOW_VAR_REPO : local.registry_url,
   }
+}
 ```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
