@@ -19,7 +19,7 @@ An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end
 
 ## Architecture
 
-<img alt="Architecture Diagram" src="docs/arch_diagram.png" width="50%" height="50%">
+<img alt="Architecture Diagram" src="docs/arch_diagram.png">
 
 ## Cost
 
