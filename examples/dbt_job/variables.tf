@@ -25,7 +25,7 @@ variable "region" {
 }
 
 variable "gcs_location" {
-  description = "GCS .ocation"
+  description = "GCS location"
   type        = string
 }
 

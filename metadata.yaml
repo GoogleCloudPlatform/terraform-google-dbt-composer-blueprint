@@ -22,7 +22,7 @@ spec:
   info:
     title: terraform-google-dbt-composer-blueprint
     source:
-      repo: sso://cloud-fsi-solutions/terraform-google-dbt-composer-blueprint
+      repo: sso://cloudsolutionarchitects/terraform-google-dbt-composer-blueprint
       sourceType: git
     version: 0.0.1
     actuationTool:

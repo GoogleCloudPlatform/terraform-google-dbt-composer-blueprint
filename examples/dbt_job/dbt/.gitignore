@@ -1,4 +1,2 @@
-
-# Ignore DBT generated output and logs
 target/
 logs/

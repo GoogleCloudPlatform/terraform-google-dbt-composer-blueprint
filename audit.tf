@@ -16,16 +16,14 @@
 
 # Create dataset for monitoring
 module "bigquery_audit" {
-  source = "github.com/terraform-google-modules/terraform-google-bigquery?ref=v6.1.1"
+  source  = "terraform-google-modules/bigquery/google"
+  version = "7.0.0"
 
   project_id   = module.project_services.project_id
-  dataset_id   = each.value
-  dataset_name = each.value
-  description  = "Dataset ${each.value} created by terraform"
+  dataset_id   = var.monitoring_dataset
+  dataset_name = var.monitoring_dataset
+  description  = "Dataset ${var.monitoring_dataset} created by terraform"
   location     = var.bq_location
-
-  # List of datasets to create
-  for_each = toset([var.monitoring_dataset])
 }
 
 # Create audit table outline.
@@ -33,12 +31,7 @@ module "bigquery_audit" {
 # table will be expanded for all new columns once data starts flowing in.
 resource "google_bigquery_table" "cloudaudit_table" {
 
-  # Only create table after the dataset is created
-  depends_on = [
-    module.bigquery_audit
-  ]
-
-  dataset_id    = var.monitoring_dataset
+  dataset_id    = module.bigquery_audit.bigquery_dataset.dataset_id
   table_id      = "cloudaudit_googleapis_com_data_access"
   friendly_name = "cloudaudit_googleapis_com_data_access"
   project       = module.project_services.project_id
@@ -62,22 +55,28 @@ resource "google_bigquery_table" "cloudaudit_table" {
   }
 }
 
-
+# Extract table name from cloudaudit_table,
+# In order to create the implicit dependencies between table and
+# the downstream view
+locals {
+  audit_table_id_array = split("/", google_bigquery_table.cloudaudit_table.id)
+  audit_table_name     = element(local.audit_table_id_array, length(local.audit_table_id_array) - 1)
+}
 # Create the materialized view on the audit table
 #
 # This materialized view will extract and format common JSON fields for BigQuery audit logs,
 # including DBT metadata.
-#
 data "template_file" "bigquery_jobs_view" {
   template = file("${path.module}/bigquery_jobs_view.sql")
   vars = {
-    monitoring_dataset = var.monitoring_dataset
+    monitoring_dataset = module.bigquery_audit.bigquery_dataset.dataset_id
+    audit_table        = local.audit_table_name
   }
 }
 
 resource "google_bigquery_table" "bigquery_materialized_view" {
   project             = module.project_services.project_id
-  dataset_id          = var.monitoring_dataset
+  dataset_id          = module.bigquery_audit.bigquery_dataset.dataset_id
   friendly_name       = "bigquery_jobs"
   table_id            = "bigquery_jobs"
   description         = "BigQuery jobs (with DBT extras) logical view"
@@ -92,10 +91,6 @@ resource "google_bigquery_table" "bigquery_materialized_view" {
     query = data.template_file.bigquery_jobs_view.rendered
   }
 
-  depends_on = [
-    google_bigquery_table.cloudaudit_table
-  ]
-
   lifecycle {
     ignore_changes = [
       encryption_configuration
@@ -103,6 +98,13 @@ resource "google_bigquery_table" "bigquery_materialized_view" {
   }
 }
 
+# Extract table name from bigquery_materialized_view,
+# In order to create the implicit dependencies between table and
+# the downstream view
+locals {
+  job_table_id_array = split("/", google_bigquery_table.bigquery_materialized_view.id)
+  job_table_name     = element(local.job_table_id_array, length(local.job_table_id_array) - 1)
+}
 # Create the next level view on the materialized view.
 #
 # This view will extract DBT-job-level metadata and bring it to
@@ -110,13 +112,14 @@ resource "google_bigquery_table" "bigquery_materialized_view" {
 data "template_file" "dbt_jobs_view" {
   template = file("${path.module}/dbt_jobs_view.sql")
   vars = {
-    monitoring_dataset = var.monitoring_dataset
+    monitoring_dataset = module.bigquery_audit.bigquery_dataset.dataset_id
+    job_table          = local.job_table_name
   }
 }
 
 resource "google_bigquery_table" "dbt_view" {
   project             = module.project_services.project_id
-  dataset_id          = var.monitoring_dataset
+  dataset_id          = module.bigquery_audit.bigquery_dataset.dataset_id
   friendly_name       = "dbt_jobs"
   table_id            = "dbt_jobs"
   description         = "DBT jobs (with DBT metadata) logical view"
@@ -126,10 +129,6 @@ resource "google_bigquery_table" "dbt_view" {
     query          = data.template_file.dbt_jobs_view.rendered
     use_legacy_sql = false
   }
-
-  depends_on = [
-    google_bigquery_table.bigquery_materialized_view
-  ]
 
   #lifecycle {
   #  ignore_changes = [
@@ -145,14 +144,11 @@ resource "google_logging_project_sink" "cloud_audit_sink" {
   name                   = "bigquery_audit_export"
   project                = module.project_services.project_id
   filter                 = "protoPayload.metadata.\"@type\"=\"type.googleapis.com/google.cloud.audit.BigQueryAuditMetadata\""
-  destination            = "bigquery.googleapis.com/projects/${module.project_services.project_id}/datasets/${var.monitoring_dataset}"
+  destination            = "bigquery.googleapis.com/projects/${module.project_services.project_id}/datasets/${module.bigquery_audit.bigquery_dataset.dataset_id}"
   unique_writer_identity = true
   bigquery_options {
     use_partitioned_tables = true
   }
-  depends_on = [
-    google_bigquery_table.cloudaudit_table
-  ]
 }
 
 resource "google_project_iam_member" "bigquery_sink_member" {

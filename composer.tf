@@ -14,13 +14,16 @@
 
 
 locals {
-  gcs_docs_bucket = module.gcs_docs_bucket.buckets_map["docs"].name
+  gcs_docs_bucket               = module.gcs_docs_bucket.buckets_map["docs"].name
+  cluster_secondary_range_name  = "composer-subnet-cluster"
+  services_secondary_range_name = "composer-subnet-services"
 }
 
 # Create a Cloud Composer specific service account
 # See https://github.com/terraform-google-modules/terraform-google-service-accounts
 module "composer_service_account" {
-  source = "github.com/terraform-google-modules/terraform-google-service-accounts?ref=v4.2.1"
+  source  = "terraform-google-modules/service-accounts/google"
+  version = "4.2.1"
 
   project_id = module.project_services.project_id
   prefix     = local.env_name
@@ -38,7 +41,8 @@ module "composer_service_account" {
 # Create a new network and subnet
 # See https://github.com/terraform-google-modules/terraform-google-network
 module "vpc" {
-  source = "github.com/terraform-google-modules/terraform-google-network?ref=v7.3.0"
+  source  = "terraform-google-modules/network/google"
+  version = "7.3.0"
 
   project_id   = module.project_services.project_id
   network_name = "${local.env_name}-network"
@@ -54,11 +58,11 @@ module "vpc" {
   secondary_ranges = {
     composer-subnet = [
       {
-        range_name    = "composer-subnet-cluster"
+        range_name    = local.cluster_secondary_range_name
         ip_cidr_range = "10.154.0.0/17"
       },
       {
-        range_name    = "composer-subnet-services"
+        range_name    = local.services_secondary_range_name
         ip_cidr_range = "10.154.128.0/22"
       },
     ]
@@ -101,8 +105,8 @@ resource "google_composer_environment" "composer_env" {
       subnetwork      = module.vpc.subnets["${var.region}/composer-subnet"].id
       service_account = module.composer_service_account.email
       ip_allocation_policy {
-        cluster_secondary_range_name  = "composer-subnet-cluster"
-        services_secondary_range_name = "composer-subnet-services"
+        cluster_secondary_range_name  = local.cluster_secondary_range_name
+        services_secondary_range_name = local.services_secondary_range_name
       }
     }
   }

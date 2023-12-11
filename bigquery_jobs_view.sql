@@ -26,7 +26,7 @@ WITH
       protopayload_auditlog.resourceName,
       protopayload_auditlog.authenticationInfo.principalEmail,
     FROM
-      `${monitoring_dataset}.cloudaudit_googleapis_com_data_access` d
+      `${monitoring_dataset}.${audit_table}` d
     WHERE
       resource.type='bigquery_project' AND
       protopayload_auditlog.methodName='google.cloud.bigquery.v2.JobService.InsertJob' AND

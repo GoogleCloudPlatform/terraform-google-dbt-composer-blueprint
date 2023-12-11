@@ -22,8 +22,8 @@ locals {
 # See https://github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
 module "project_services" {
-  source = "github.com/terraform-google-modules/terraform-google-project-factory//modules/project_services?ref=v14.3.0"
-
+  source                      = "terraform-google-modules/project-factory/google//modules/project_services"
+  version                     = "14.3.0"
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false

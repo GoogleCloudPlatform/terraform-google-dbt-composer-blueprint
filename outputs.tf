@@ -37,6 +37,5 @@ output "docs_gcs_bucket" {
 
 output "lookerstudio_create_dashboard_url" {
   description = "Looker Studio template dashboard"
-  # TODO: Fill out form with https://b.corp.google.com/issues?q=componentid:921724%20
-  value      = "https://lookerstudio.google.com/reporting/create?c.reportId=1e0b060b-064a-4266-b115-e224da42689f&c.reportName=MyNewReport&ds.dbt_jobs.projectId=${var.project_id}&ds.dbt_jobs.billingProjectId=${var.project_id}&ds.dbt_jobs.type=TABLE&ds.dbt_jobs.datasetId=${var.monitoring_dataset}&ds.dbt_jobs.tableId=dbt_jobs"
+  value       = "https://lookerstudio.google.com/reporting/create?c.reportId=1e0b060b-064a-4266-b115-e224da42689f&c.reportName=MyNewReport&ds.dbt_jobs.projectId=${var.project_id}&ds.dbt_jobs.billingProjectId=${var.project_id}&ds.dbt_jobs.type=TABLE&ds.dbt_jobs.datasetId=${var.monitoring_dataset}&ds.dbt_jobs.tableId=dbt_jobs"
 }

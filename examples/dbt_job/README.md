@@ -8,7 +8,7 @@ To deploy this example do the following from a Linux command line:
 
 1. Run `terraform init`.
 
-2. Create a `terraform.tfvars` to provide values for `project_id`, `region`, `bq_location`, and `gcs_location`. Region is used for Cloud Composer and the artifact repository. BQ Location is used for the BigQuery storage location.
+2. Create a `terraform.tfvars` to provide values for `project_id`, `region`, `bq_location`, and `gcs_location`. Region is used for Cloud Composer and the artifact repository. BQ Location is used for the BigQuery storage location. GCS Location is used for the location of GCS buckets (multi-regional or single region).
 
 3. Run `terraform apply`.
 
@@ -42,7 +42,7 @@ ensure all containers have a link back to the original source code.
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bq\_location | BigQuery dataset location | `string` | n/a | yes |
-| gcs\_location | GCS .ocation | `string` | n/a | yes |
+| gcs\_location | GCS location | `string` | n/a | yes |
 | project\_id | The ID of the project in which to provision resources | `string` | n/a | yes |
 | region | Region for composer and artifact repository | `string` | n/a | yes |
 

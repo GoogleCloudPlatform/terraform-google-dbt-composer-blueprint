@@ -34,7 +34,8 @@ locals {
 # See https://github.com/terraform-google-modules/terraform-google-project-factory
 # The modules/project_services
 module "project_services" {
-  source = "github.com/terraform-google-modules/terraform-google-project-factory//modules/project_services?ref=v14.3.0"
+  source  = "terraform-google-modules/project-factory/google//modules/project_services"
+  version = "14.3.0"
 
   project_id                  = var.project_id
   disable_services_on_destroy = false
@@ -44,7 +45,8 @@ module "project_services" {
 }
 
 module "gcs_docs_bucket" {
-  source = "github.com/terraform-google-modules/terraform-google-cloud-storage?ref=v4.0.1"
+  source  = "terraform-google-modules/cloud-storage/google"
+  version = "4.0.1"
 
   project_id       = module.project_services.project_id
   prefix           = module.project_services.project_id

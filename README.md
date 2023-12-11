@@ -1,51 +1,52 @@
 # terraform-google-dbt-composer-blueprint
 
 ## Description
-### Tagline
-This is an auto-generated module.
 
-### Detailed
-This module was generated from [terraform-google-module-template](https://github.com/terraform-google-modules/terraform-google-module-template/), which by default generates a module that simply creates a GCS bucket. As the module develops, this README should be updated.
+### Overview
 
-The resources/services/activations/deletions that this module will create/trigger are:
+This module stands up an integrated DBT and Composer operation environment.
 
-- Create a GCS bucket with the provided name
+It does the following:
+ * Applies required APIs and permissions in the project
+ * Creates a documentation (for DBT) bucket
+ * Creates a Composer environment, including VPC, and a service account
+ * Copies across DAG utilities for Composer
+ * Exports audit logs for the project into a BigQuery project, including two materialized views and a view on top to support dashboards
 
-### PreDeploy
-To deploy this blueprint you must have an active billing account and billing permissions.
+### Examples
+
+An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end-to-end example is included that shows using the DAG utilities and standing up a simple DBT job in Cloud Composer.
 
 ## Architecture
-![alt text for diagram](https://www.link-to-architecture-diagram.com)
-1. Architecture description step no. 1
-2. Architecture description step no. 2
-3. Architecture description step no. N
 
-## Documentation
-- [Hosting a Static Website](https://cloud.google.com/storage/docs/hosting-static-website)
-
-## Deployment Duration
-Configuration: X mins
-Deployment: Y mins
+<img alt="Architecture Diagram" src="docs/arch_diagram.png" width="50%" height="50%">
 
 ## Cost
-[Blueprint cost details](https://cloud.google.com/products/calculator?id=02fb0c45-cc29-4567-8cc6-f72ac9024add)
+
+The major cost is in Cloud Composer Airflow. Cloud Build, Cloud Storage, Artifact Repository, and BigQuery are all costs that scale up and down with your usage, while Cloud Composer has minimum fixed costs depending on your side. It scales up with more work.
+
+An example Cloud Composer 2 pricing can be found [here](https://cloud.google.com/composer/pricing#composer-2-example).
 
 ## Usage
 
 Basic usage of this module is as follows:
 
 ```hcl
-module "reg_reporting_blueprint" {
-  source  = "terraform-google-modules/dbt-composer-blueprint/google"
+
+# Create DBT Composer setup
+module "dbt_composer" {
+  source  = "GoogleCloudPlatform/dbt-composer-blueprint/google"
   version = "~> 0.1"
+  project_id   = "your project"
+  region       = "your region for Composer"
+  gcs_location = "your location for GCS"
+  bq_location  = "your location for BigQuery"
 
-  project_id  = "<PROJECT ID>"
-  bucket_name = "gcs-test-bucket"
-}
+  # Environment variables for the Airflow environment
+  env_variables = {
+    AIRFLOW_VAR_REPO : local.registry_url,
+  }
 ```
-
-Functional examples are included in the
-[examples](./examples/) directory.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Inputs
@@ -53,7 +54,7 @@ Functional examples are included in the
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bq\_location | The BQ location where the datasets will be created | `string` | n/a | yes |
-| composer\_version | Version of Cloud Composer | `string` | `"composer-2.4.0-airflow-2.5.3"` | no |
+| composer\_version | Version of Cloud Composer | `string` | `"composer-2.4.6-airflow-2.6.3"` | no |
 | env\_variables | Variables of the airflow environment. | `map(string)` | `{}` | no |
 | gcs\_location | The GCS location where the buckets will be created | `string` | n/a | yes |
 | goog\_packaged\_solution | Google packaged solution label | `string` | `"gcp-dbt-composer"` | no |
@@ -81,29 +82,8 @@ These sections describe requirements for using this module.
 
 The following dependencies must be available:
 
-- [Terraform][terraform] v0.13
-- [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.0
-
-### Service Account
-
-A service account with the following roles must be used to provision
-the resources of this module:
-
-- Storage Admin: `roles/storage.admin`
-
-The [Project Factory module][project-factory-module] and the
-[IAM module][iam-module] may be used in combination to provision a
-service account with the necessary roles applied.
-
-### APIs
-
-A project with the following APIs enabled must be used to host the
-resources of this module:
-
-- Google Cloud Storage JSON API: `storage-api.googleapis.com`
-
-The [Project Factory module][project-factory-module] can be used to
-provision a project with the necessary APIs enabled.
+- [Terraform][terraform] v1.3
+- [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.53+
 
 ## Contributing
 

@@ -26,7 +26,7 @@ WITH
       MIN(job_stats.create_time) AS create_time,
       MAX(job_stats.end_time) AS end_time
     FROM
-      `${monitoring_dataset}.bigquery_jobs` j
+      `${monitoring_dataset}.${job_table}` j
     WHERE
       dbt.dbt_invocation_id IS NOT NULL
     GROUP BY
