@@ -33,9 +33,15 @@ spec:
         bq_location:
           name: bq_location
           title: Bq Location
+        composer_version:
+          name: composer_version
+          title: Composer Version
         enable_vertexai:
           name: enable_vertexai
           title: Enable Vertexai
+        env_variables:
+          name: env_variables
+          title: Env Variables
         gcs_location:
           name: gcs_location
           title: Gcs Location

@@ -61,11 +61,11 @@ ensure all containers have a link back to the original source code.
 
 | Name | Description |
 |------|-------------|
-| airflow\_dag\_gcs\_prefix | n/a |
-| airflow\_uri | n/a |
-| docs\_gcs\_bucket | n/a |
-| lookerstudio\_create\_dashboard\_url | n/a |
-| project\_id | n/a |
+| airflow\_dag\_gcs\_prefix | Airflow (Composer) GCS bucket for hosting DAGs |
+| airflow\_uri | Airflow URI for the web interface |
+| docs\_gcs\_bucket | GCS bucket for hosting DBT documentation and runtime files |
+| lookerstudio\_create\_dashboard\_url | Lookerstudio template dashboard |
+| project\_id | Project ID for Composer and BigQuery |
 | registry\_url | Artefact registry for DBT containers |
 
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

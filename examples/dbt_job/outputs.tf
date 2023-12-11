@@ -15,19 +15,23 @@
  */
 
 output "project_id" {
-  value = var.project_id
+  description = "Project ID for Composer and BigQuery"
+  value       = var.project_id
 }
 
 output "airflow_uri" {
-  value = module.dbt_composer.airflow_uri
+  description = "Airflow URI for the web interface"
+  value       = module.dbt_composer.airflow_uri
 }
 
 output "airflow_dag_gcs_prefix" {
-  value = module.dbt_composer.airflow_dag_gcs_prefix
+  description = "Airflow (Composer) GCS bucket for hosting DAGs"
+  value       = module.dbt_composer.airflow_dag_gcs_prefix
 }
 
 output "docs_gcs_bucket" {
-  value = module.dbt_composer.docs_gcs_bucket
+  description = "GCS bucket for hosting DBT documentation and runtime files"
+  value       = module.dbt_composer.docs_gcs_bucket
 }
 
 output "registry_url" {
@@ -36,5 +40,6 @@ output "registry_url" {
 }
 
 output "lookerstudio_create_dashboard_url" {
-  value = module.dbt_composer.lookerstudio_create_dashboard_url
+  description = "Lookerstudio template dashboard"
+  value       = module.dbt_composer.lookerstudio_create_dashboard_url
 }
