@@ -22,23 +22,17 @@ spec:
   info:
     title: terraform-google-dbt-composer-blueprint
     source:
-      repo: sso://cloudsolutionarchitects/terraform-google-dbt-composer-blueprint
+      repo: https://github.com/GoogleCloudPlatform/terraform-google-dbt-composer-blueprint.git
       sourceType: git
   ui:
     input:
       variables:
-        bq_datasets:
-          name: bq_datasets
-          title: Bq Datasets
         bq_location:
           name: bq_location
           title: Bq Location
         composer_version:
           name: composer_version
           title: Composer Version
-        enable_vertexai:
-          name: enable_vertexai
-          title: Enable Vertexai
         env_variables:
           name: env_variables
           title: Env Variables

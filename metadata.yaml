@@ -22,7 +22,7 @@ spec:
   info:
     title: terraform-google-dbt-composer-blueprint
     source:
-      repo: sso://cloudsolutionarchitects/terraform-google-dbt-composer-blueprint
+      repo: https://github.com/GoogleCloudPlatform/terraform-google-dbt-composer-blueprint.git
       sourceType: git
     version: 0.0.1
     actuationTool:
@@ -33,15 +33,6 @@ spec:
     costEstimate:
       description: The major cost is in Cloud Composer Airflow. Cloud Build, Cloud Storage, Artifact Repository, and BigQuery are all costs that scale up and down with your usage, while Cloud Composer has minimum fixed costs depending on your side. It scales up with more work.
   content:
-    architecture:
-      diagramUrl: https://www.link-to-architecture-diagram.com
-      description:
-        - 1. Architecture description step no. 1
-        - 2. Architecture description step no. 2
-        - 3. Architecture description step no. N
-    documentation:
-      - title: Hosting a Static Website
-        url: https://cloud.google.com/storage/docs/hosting-static-website
     examples:
       - name: dbt_job
         location: examples/dbt_job
