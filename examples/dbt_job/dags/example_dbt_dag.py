@@ -64,14 +64,5 @@ def example_dbt_dag():
         },
     )
 
-    # This is necessary if using DBT prior to 1.7.
-    #
-    # NOTE: The target prefix must have the task_id from the previous task
-    # (example_dbt_job in this case)
-    # generate_dbt_docs = dbt_static_docs(
-    #     os.getenv('AIRFLOW_VAR_GCS_DOCS_BUCKET'),
-    #     ('{{ dag_run.dag_id }}/' + 'example_dbt_job' +
-    #      '/{{ execution_date | ts }}/dbt/target/'))
-
 
 example_dbt_dag()

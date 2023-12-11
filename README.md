@@ -86,6 +86,11 @@ The following dependencies must be available:
 - [Terraform][terraform] v1.3
 - [Terraform Provider for GCP][terraform-provider-gcp] plugin v3.53+
 
+This blueprint also requires a recent version of Cloud Composer and DBT:
+
+- DBT 1.7+ for the --static documentation generation
+- composer-2.5.2-airflow-2.5.3 or above (due to apache-airflow-providers-cncf-kubernetes 7.8+ for rendering of KubernetesOperator V1VolumeMount)
+
 ## Contributing
 
 Refer to the [contribution guidelines](./CONTRIBUTING.md) for

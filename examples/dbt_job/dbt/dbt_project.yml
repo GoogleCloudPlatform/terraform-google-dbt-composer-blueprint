@@ -35,12 +35,6 @@ clean-targets:         # directories to be removed by `dbt clean`
     - "dbt_packages"
     - "logs"
 
-# Variables used in the SQL models
-vars:
-    reporting_day: '2021-09-01'      # The date when the report is valued at. Typically this would be today's date, and
-                                     # should always be provided when the run command is issued, using the var flag - e.g.
-                                     # dbt run --profiles-dir profiles --vars '{"reporting_day": "2021-09-03"}'
-
 # Configuring models
 # Full documentation: https://docs.getdbt.com/docs/configuring-models
 models:
@@ -51,9 +45,6 @@ models:
       +persist_docs:
           relation: true
           columns: true
-      # Add solutions label - PLEASE DO NOT REMOVE
-      +labels:
-        goog-packaged-solution: gcp-reg-reporting
 
 # Add a on-run-start hook to execute a trivial query (SELECT 1) that will
 # also generate a special single line comment /* DBT <json> */. This single

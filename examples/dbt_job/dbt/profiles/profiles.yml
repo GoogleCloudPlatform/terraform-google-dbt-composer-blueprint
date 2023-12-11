@@ -32,7 +32,7 @@ example_profile:
       method: oauth
       project: "{{ env_var('DBT_ENV_CUSTOM_ENV_PROJECT_ID') }}"
       location: "{{ env_var('DBT_ENV_CUSTOM_ENV_BQ_LOCATION') }}"
-      dataset: regrep
+      dataset: dbt_composer_sample
       threads: 10
       timeout_seconds: 300
       priority: interactive

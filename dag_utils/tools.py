@@ -106,34 +106,13 @@ class ComposerPodOperator(KubernetesPodOperator):
 
             # Capture all of the logs
             get_logs=True,
-            container_logs=True,   # All containers, not just base
+            container_logs=False,   # All containers, not just base
             log_events_on_failure=True,
             # True (default) - delete the pod
             # False - leave the pod
             is_delete_operator_pod=True,
 
             **kwargs)
-
-    # This is no longer needed once this PR is merged and live:
-    # https://github.com/apache/airflow/pull/35129/files
-    def _render_nested_template_fields(
-        self,
-        content,
-        context,
-        jinja_env,
-        seen_oids: set,
-    ) -> None:
-        if (id(content) not in seen_oids and
-           isinstance(content, V1VolumeMount)):
-
-            seen_oids.add(id(content))
-            self._do_render_template_fields(
-                content, ("name", "sub_path", ),
-                context, jinja_env, seen_oids)
-            return
-
-        super()._render_nested_template_fields(
-            content, context, jinja_env, seen_oids)
 
 
 class DBTComposerPodOperator(ComposerPodOperator):
