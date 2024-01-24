@@ -106,10 +106,7 @@ class ComposerPodOperator(KubernetesPodOperator):
 
             # Capture all of the logs
             get_logs=True,
-            container_logs=False,   # All containers, not just base
             log_events_on_failure=True,
-            # True (default) - delete the pod
-            # False - leave the pod
             is_delete_operator_pod=True,
 
             **kwargs)

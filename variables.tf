@@ -52,6 +52,12 @@ variable "monitoring_dataset" {
   default     = "monitoring"
 }
 
+variable "private_ip" {
+  description = "Whether to use private connectivity for Composer"
+  type        = bool
+  default     = true
+}
+
 variable "goog_packaged_solution" {
   description = "Google packaged solution label"
   type        = string
