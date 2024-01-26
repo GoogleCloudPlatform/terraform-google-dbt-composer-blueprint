@@ -27,7 +27,7 @@ variable "region" {
 variable "composer_version" {
   description = "Version of Cloud Composer"
   type        = string
-  default     = "composer-2.5.2-airflow-2.6.3"
+  default     = "composer-2.5.4-airflow-2.6.3"
 }
 
 variable "env_variables" {
@@ -50,6 +50,12 @@ variable "monitoring_dataset" {
   description = "Dataset for monitoring activity"
   type        = string
   default     = "monitoring"
+}
+
+variable "enable_private_ip" {
+  description = "Whether to use private connectivity for Composer"
+  type        = bool
+  default     = true
 }
 
 variable "goog_packaged_solution" {
