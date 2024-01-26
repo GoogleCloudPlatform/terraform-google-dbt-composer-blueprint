@@ -52,7 +52,7 @@ variable "monitoring_dataset" {
   default     = "monitoring"
 }
 
-variable "private_ip" {
+variable "enable_private_ip" {
   description = "Whether to use private connectivity for Composer"
   type        = bool
   default     = true
