@@ -41,11 +41,9 @@ class ComposerPodOperator(KubernetesPodOperator):
         # NOTE: There is a limitation to the GCS Fuse that it
         # waits 30 seconds after a pod terminates.
         #
-        # This will be configurable soon, and, with the release of Kubernetes
-        # 1.29, it will be properly supported.
-        #
-        # This is related to this:
-        # https://github.com/GoogleCloudPlatform/gcs-fuse-csi-driver/issues/23
+        # This delay is removed in the gcs-fuse-csi-driver but may not yet
+        # be available in Composer and GKE Autopilot:
+        # https://github.com/GoogleCloudPlatform/gcs-fuse-csi-driver/issues/91#issuecomment-1886185228
         if doc_dirs:
 
             # Initialize these values in kwargs
@@ -158,10 +156,10 @@ class DBTComposerPodOperator(ComposerPodOperator):
         })
 
         if capture_docs:
-            doc_dirs.extend([
+            doc_dirs = doc_dirs + [
                 '/dbt/target',
                 '/dbt/logs',
-            ])
+            ]
 
         super().__init__(
             env_vars=env_vars,
