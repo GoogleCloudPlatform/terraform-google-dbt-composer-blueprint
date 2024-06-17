@@ -19,7 +19,13 @@ It does the following:
 
 ## Examples
 
+### DBT and Composer blueprint
+
 An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end-to-end example is included that shows using the DAG utilities and standing up a simple DBT job in Cloud Composer.
+
+### DBT Development
+
+An example of developing DBT in Cloud Shell can be found in [docs/dbt_development](docs/dbt_development.md). This shows developing DBT in Code OSS (Cloud Shell Editor).
 
 ## Cost
 
