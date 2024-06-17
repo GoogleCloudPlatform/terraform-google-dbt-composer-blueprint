@@ -25,6 +25,8 @@ An example can be found in [examples/dbt_job](examples/dbt_job/README.md) an end
 
 ### DBT Development
 
+[![Open in Cloud Shell](https://gstatic.com/cloudssh/images/open-btn.png)](https://shell.cloud.google.com/?cloudshell_git_repo=https://github.com/GoogleCloudPlatform/terraform-google-dbt-composer-blueprint&cloudshell_tutorial=docs/dbt_development.md&show=terminal)
+
 An example of developing DBT in Cloud Shell can be found in [docs/dbt_development](docs/dbt_development.md). This shows developing DBT in Code OSS (Cloud Shell Editor).
 
 ## Cost
