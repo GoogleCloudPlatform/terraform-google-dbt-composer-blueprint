@@ -3,8 +3,7 @@
 ## Overview
 
 This tutorial will setup Cloud Shell to be useful for basic DBT
-development, both from the command line and using Cloud Shell Editor,
-for regulatory reporting.
+development both from the command line and using Cloud Shell Editor.
 
 ## Install Python development tools
 

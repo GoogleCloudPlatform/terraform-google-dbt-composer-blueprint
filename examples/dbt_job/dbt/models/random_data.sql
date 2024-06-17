@@ -14,7 +14,7 @@
 
 
 SELECT
-  i AS idx,
-  CAST(FLOOR(RAND() * 1000000) AS STRING) AS random_string
+    i AS idx,
+    CAST(FLOOR(RAND() * 1000000) AS STRING) AS random_string
 FROM
-  UNNEST(GENERATE_ARRAY(1, 100000, 1)) i
+    UNNEST(GENERATE_ARRAY(1, 100000, 1)) AS i
