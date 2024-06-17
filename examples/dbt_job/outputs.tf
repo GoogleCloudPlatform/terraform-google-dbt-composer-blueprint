@@ -43,3 +43,8 @@ output "lookerstudio_create_dashboard_url" {
   description = "Lookerstudio template dashboard"
   value       = module.dbt_composer.lookerstudio_create_dashboard_url
 }
+
+output "ingestion_gcs_bucket" {
+  description = "GCS ingestion bucket"
+  value       = module.gcs_ingestion_bucket.buckets_map["ingestion"].name
+}

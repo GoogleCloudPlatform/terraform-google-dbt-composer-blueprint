@@ -165,3 +165,217 @@ class DBTComposerPodOperator(ComposerPodOperator):
             env_vars=env_vars,
             doc_dirs=doc_dirs,
             **kwargs)
+
+
+from airflow.providers.google.cloud.operators.cloud_run import (
+    CloudRunExecuteJobOperator,
+)
+from google.cloud.run_v2 import Job
+from google.cloud.run_v2.types import k8s_min, Volume, GCSVolumeSource, VolumeMount, EnvVar
+
+
+def _create_job(image, cmds, env_vars, doc_dirs):
+    # Path in the docs bucket for the files
+    sub_path = ('{{ dag_run.dag_id }}/{{ task.task_id }}' +
+                '/{{ execution_date | ts }}')
+
+    # https://cloud.google.com/python/docs/reference/run/latest/google.cloud.run_v2.types.Job
+    job = Job()
+
+    # Issue: the template.template.containers[].volume_mounts[].sub_path needs
+    # to be templated!
+
+    job.template.template.containers = [k8s_min.Container(
+        image=image,
+        command=cmds,
+        env=[EnvVar(k, v) for k, v in env_vars.items()],
+        volume_mounts=[
+            VolumeMount(
+                'bucket',
+                sub_path + doc_dir)
+            for doc_dir in doc_dirs
+        ],
+    )]
+    # job.template.template.service_account = 'string'
+    job.template.template.volumes = [k8s_min.Volume(
+        name='bucket',
+        gcs=k8s_min.GCSVolumeSource(
+            bucket=GCS_DOCS_BUCKET,
+            read_only=False,
+        ),
+    )]
+    return job
+
+
+class DBTComposerJobOperator(CloudRunExecuteJobOperator):
+    def __init__(self,
+                 image,
+                 cmds,
+                 env_vars={},
+                 dbt_vars=None,
+                 doc_dirs=[],
+                 capture_docs=True,
+                 **kwargs):
+
+        # Set DBT_VARS environment variable if necessary
+        if dbt_vars:
+            env_vars['DBT_VARS'] = json.dumps(dbt_vars)
+
+        # Disable colours on output -- Airflow does not render it
+        env_vars.setdefault('DBT_USE_COLORS', 'false')
+
+        # Disable anonymous usage stats
+        env_vars.setdefault('DBT_SEND_ANONYMOUS_USAGE_STATS', 'false')
+
+        # Add the general DBT environment variables
+        env_vars.update({
+            'DBT_ENV_CUSTOM_ENV_PROJECT_ID':
+                '{{ var.value.PROJECT_ID }}',
+            'DBT_ENV_CUSTOM_ENV_REGION':
+                '{{ var.value.REGION }}',
+            'DBT_ENV_CUSTOM_ENV_BQ_LOCATION':
+                '{{ var.value.BQ_LOCATION }}',
+            'DBT_ENV_CUSTOM_ENV_GCS_DOCS_BUCKET':
+                '{{ var.value.GCS_DOCS_BUCKET }}',
+        })
+
+        # Add generic Airflow environment variables
+        env_vars.update({
+            'DBT_ENV_CUSTOM_ENV_AIRFLOW_BASE_URL':
+                os.getenv('AIRFLOW__WEBSERVER__BASE_URL'),
+            'DBT_ENV_CUSTOM_ENV_AIRFLOW_CTX_TASK_ID':
+                '{{ task.task_id }}',
+            'DBT_ENV_CUSTOM_ENV_AIRFLOW_CTX_DAG_ID':
+                '{{ dag_run.dag_id }}',
+            'DBT_ENV_CUSTOM_ENV_AIRFLOW_CTX_EXECUTION_DATE':
+                '{{ execution_date | ts }}',
+        })
+
+        if capture_docs:
+            doc_dirs = doc_dirs + [
+                '/dbt/target',
+                '/dbt/logs',
+            ]
+
+        # Path in the docs bucket for the files
+        sub_path = ('{{ dag_run.dag_id }}/{{ task.task_id }}' +
+                    '/{{ execution_date | ts }}')
+
+        # https://cloud.google.com/python/docs/reference/run/latest/google.cloud.run_v2.types.Job
+        job = Job()
+
+        # Issue: the template.template.containers[].volume_mounts[].sub_path needs
+        # to be templated!
+
+        job.template.template.containers = [k8s_min.Container(
+            image=image,
+            command=cmds,
+            env=[EnvVar(k, v) for k, v in env_vars.items()],
+            volume_mounts=[
+                VolumeMount(
+                    'bucket',
+                    sub_path + doc_dir)
+                for doc_dir in doc_dirs
+            ],
+        )]
+        # job.template.template.service_account = 'string'
+        job.template.template.volumes = [k8s_min.Volume(
+            name='bucket',
+            gcs=k8s_min.GCSVolumeSource(
+                bucket=GCS_DOCS_BUCKET,
+                read_only=False,
+            ),
+        )]
+
+        super().__init__(
+            job_name='x',
+            job=job,
+            **kwargs
+        )
+        #super().__init__(
+        #    env_vars=env_vars,
+        #    doc_dirs=doc_dirs,
+        #    **kwargs)
+
+# class ComposerJobOperator(CloudRunExecuteJobOperator):
+#
+#     # need: project_id, region
+#     # need: job_name (unique)
+#     #
+#     def __init__(self,
+#                  # Directories to map into the DOCS gcs bucket
+#                  doc_dirs=[],
+#                  **kwargs):
+#
+#         # NOTE: There is a limitation to the GCS Fuse that it
+#         # waits 30 seconds after a pod terminates.
+#         #
+#         # This delay is removed in the gcs-fuse-csi-driver but may not yet
+#         # be available in Composer and GKE Autopilot:
+#         # https://github.com/GoogleCloudPlatform/gcs-fuse-csi-driver/issues/91#issuecomment-1886185228
+#         if doc_dirs:
+#
+#             # Initialize these values in kwargs
+#             kwargs.setdefault('annotations', {})
+#             kwargs.setdefault('volumes', [])
+#             kwargs.setdefault('volume_mounts', [])
+#
+#             # Add in the required annotations
+#             kwargs['annotations'].update({
+#                 "gke-gcsfuse/volumes": "true",
+#             })
+#
+#             # Add in the docs bucket volume
+#             kwargs['volumes'].append(V1Volume(
+#                 name="docs-bucket",
+#                 csi=V1CSIVolumeSource(
+#                     driver="gcsfuse.csi.storage.gke.io",
+#                     read_only=False,
+#                     volume_attributes={
+#                         'bucketName': GCS_DOCS_BUCKET,
+#                         'mountOptions': ','.join([
+#                             'implicit-dirs',
+#                             'file-mode=0666',
+#                             'dir-mode=0777',
+#                         ]),
+#                     },
+#                 )
+#             ))
+#
+#             # Path in the docs bucket for the files
+#             sub_path = ('{{ dag_run.dag_id }}/{{ task.task_id }}' +
+#                         '/{{ execution_date | ts }}')
+#
+#             # Add in the docs bucket volume
+#             for doc_dir in doc_dirs:
+#                 kwargs['volume_mounts'].append(V1VolumeMount(
+#                     name="docs-bucket",
+#                     mount_path=doc_dir,
+#                     sub_path=sub_path + doc_dir,
+#                     read_only=False,
+#                 ))
+#
+#         super().__init__(
+#
+#             # Always pull -- if image is updated, we need to use the latest
+#             image_pull_policy='Always',
+#
+#             # See the following URL for why the config file needs to be set:
+#             # https://cloud.google.com/composer/docs/how-to/using/using-kubernetes-pod-operator#version-5-0-0
+#             config_file="/home/airflow/composer_kube_config",
+#             kubernetes_conn_id="kubernetes_default",
+#
+#             # As per
+#             # https://cloud.google.com/composer/docs/composer-2/use-kubernetes-pod-operator,
+#             # use the composer-user-workloads namespace unless workload
+#             # identity is setup.
+#             namespace='composer-user-workloads',
+#
+#             # Capture all of the logs
+#             get_logs=True,
+#             log_events_on_failure=True,
+#             is_delete_operator_pod=True,
+#
+#             **kwargs)
+#
+#

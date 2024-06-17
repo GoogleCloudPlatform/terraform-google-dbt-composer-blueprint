@@ -55,7 +55,6 @@ def example_dbt_dag():
             "-xc",
             "&&".join([
                 "dbt run",
-                # NOTE: --static requires version DBT 1.7+
                 "dbt docs generate --static",
             ]),
         ],

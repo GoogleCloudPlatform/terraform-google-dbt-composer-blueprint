@@ -30,6 +30,7 @@ module "project_services" {
   activate_apis = [
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
+    "cloudrun.googleapis.com",
   ]
 }
 
@@ -53,3 +54,25 @@ module "dbt_composer" {
     AIRFLOW_VAR_REPO : local.registry_url,
   }
 }
+
+# Create ingestion bucket
+module "gcs_ingestion_bucket" {
+  source  = "terraform-google-modules/cloud-storage/google"
+  version = "4.0.1"
+
+  project_id       = module.project_services.project_id
+  prefix           = module.project_services.project_id
+  location         = var.gcs_location
+  randomize_suffix = false
+
+  # List of buckets to create
+  names = [
+    "ingestion",
+  ]
+
+  # Composer can read the bucket
+  bucket_viewers = {
+    ingestion = "serviceAccount:${module.dbt_composer.composer_service_account}"
+  }
+}
+
