@@ -17,8 +17,7 @@
 import json
 import os
 
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
-    KubernetesPodOperator)
+from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
 
 from kubernetes.client.models import V1VolumeMount, V1Volume, V1CSIVolumeSource
 
