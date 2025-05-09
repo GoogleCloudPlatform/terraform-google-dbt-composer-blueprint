@@ -14,41 +14,71 @@
 
 
 import datetime
-import os
+import os # Keep import in case you use other env vars
 
 from dag_utils.tools import DBTComposerPodOperator
 from airflow.models import Param
 from airflow.decorators import dag
+from pendulum import datetime as pendulum_datetime # Using pendulum datetime for start_date is recommended
 
-# Pull repo from the environment
-REPO = os.getenv('AIRFLOW_VAR_REPO')
+# The line below is kept, but its value will no longer be used
+# as the *default* for the 'repo' param directly in the definition below.
+# If you intend to use AIRFLOW_VAR_REPO elsewhere in your DAG logic, keep this.
+# Otherwise, you could potentially remove it if 'repo' param is the only place it was used for default.
+REPO_FROM_ENV = os.getenv('AIRFLOW_VAR_REPO')
 
 
 #
 # Main dag
 #
 @dag(
+    dag_id='example_dbt_dag', # Explicitly defining dag_id is good practice
     schedule_interval='@daily',
     catchup=False,
-    start_date=datetime.datetime(2022, 1, 1),
+    # Using pendulum datetime is recommended over standard datetime
+    start_date=pendulum_datetime(2022, 1, 1, tz="UTC"), # Best practice to define timezone
+    tags=['dbt', 'example'], # Adding tags helps with organization
     params={
         'tag': Param(
             default='latest',
             type='string',
+            # description="Docker image tag for the dbt job", # Optional: Add description
         ),
         'repo': Param(
-            default=REPO,
+            # --- FIX APPLIED HERE ---
+            # Provide a hardcoded fallback default string value directly.
+            # This guarantees that the default is always a string, resolving the validation error.
+            # Replace 'your_fallback_default_repo_here' with a meaningful default
+            # (e.g., your standard repository path).
+            default='us-central1-docker.pkg.dev/andresousa-pso-upskilling/dbt-repo',
             type='string',
+            # description="Docker image repository for the dbt job", # Optional: Add description
         ),
     },
 )
+
+
+
 def example_dbt_dag():
 
     # Launch the job, optionally parameterising it from different
     # repo and tag.
+    # The task still correctly uses {{ params.repo }} and {{ params.tag }}.
+    # When the task runs, {{ params.repo }} will resolve to:
+    # 1. The value provided when the DAG run was triggered (manual/API)
+    # 2. OR, if no value was provided at trigger time, the 'default' value
+    #    defined in the 'params' section above ('your_fallback_default_repo_here').
+    #
+    # Note: If you *do* set the AIRFLOW_VAR_REPO environment variable externally
+    # in your Airflow environment, and you want *that* to be the default,
+    # you would typically structure the Param default differently or ensure
+    # the environment variable is always present.
+    # The current rewrite prioritizes making the DAG file parseable by ensuring
+    # a string default is always present *in the Param definition*.
     DBTComposerPodOperator(
         name='example_dbt_job',
         task_id='example_dbt_job',
+        # This line correctly uses the parameter value dynamically
         image='{{ params.repo }}/example-dbt-job:{{ params.tag }}',
         cmds=[
             "/bin/bash",
@@ -65,4 +95,5 @@ def example_dbt_dag():
     )
 
 
+# Instantiate the DAG
 example_dbt_dag()
