@@ -19,7 +19,7 @@ terraform {
   required_providers {
     google = {
       source  = "hashicorp/google"
-      version = ">= 3.53, < 5.0"
+      version = "~> 6.0"
     }
     template = {
       source  = "hashicorp/template"
@@ -28,6 +28,6 @@ terraform {
   }
 
   provider_meta "google" {
-    module_name = "blueprints/terraform/dbt-composer-blueprint/v0.0.1"
+    module_name = "blueprints/terraform/dbt-composer-blueprint/v0.0.2"
   }
 }

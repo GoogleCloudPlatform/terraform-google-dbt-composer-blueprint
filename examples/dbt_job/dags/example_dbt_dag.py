@@ -23,6 +23,9 @@ from airflow.decorators import dag
 # Pull repo from the environment
 REPO = os.getenv('AIRFLOW_VAR_REPO')
 
+# Pull Composer version. Composer v3 cannot capture docs with GKE.
+COMPOSER_VER = os.getenv('AIRFLOW_VAR_COMPOSER_VER')
+
 
 #
 # Main dag
@@ -49,13 +52,13 @@ def example_dbt_dag():
     DBTComposerPodOperator(
         name='example_dbt_job',
         task_id='example_dbt_job',
+        capture_docs=COMPOSER_VER == 'v2',
         image='{{ params.repo }}/example-dbt-job:{{ params.tag }}',
         cmds=[
             "/bin/bash",
             "-xc",
             "&&".join([
                 "dbt run",
-                # NOTE: --static requires version DBT 1.7+
                 "dbt docs generate --static",
             ]),
         ],

@@ -19,6 +19,8 @@ project_id="<your project-id>"
 region="europe-west1"
 bq_location="EU"
 gcs_location="eu"
+# For example, use composer-2.13.1-airflow-2.10.5 or composer-3-airflow-2.10-5-build.3
+composer_version="composer-2.13.1-airflow-2.10.5"
 ```
 
 3. Run `terraform apply`.

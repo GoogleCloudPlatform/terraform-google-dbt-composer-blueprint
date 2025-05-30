@@ -29,6 +29,13 @@ seed-paths: []
 macro-paths: []
 snapshot-paths: []
 
+flags:
+  config:
+  partial_parse: false
+  use_colors: true
+  printer_width: 100
+  send_anonymous_usage_stats: false
+
 target-path: "target"  # directory which will store compiled SQL files
 clean-targets:         # directories to be removed by `dbt clean`
     - "target"

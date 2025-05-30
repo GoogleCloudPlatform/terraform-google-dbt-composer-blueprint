@@ -1,4 +1,4 @@
-# Copyright 2023 The Reg Reporting Blueprint Authors
+# Copyright 2025 The Reg Reporting Blueprint Authors
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 import json
 import os
 
-from airflow.providers.cncf.kubernetes.operators.kubernetes_pod import (
+from airflow.providers.cncf.kubernetes.operators.pod import (
     KubernetesPodOperator)
 
 from kubernetes.client.models import V1VolumeMount, V1Volume, V1CSIVolumeSource
@@ -34,17 +34,11 @@ GCS_DOCS_BUCKET = os.getenv('AIRFLOW_VAR_GCS_DOCS_BUCKET')
 class ComposerPodOperator(KubernetesPodOperator):
 
     def __init__(self,
-                 # Directories to map into the DOCS gcs bucket
-                 doc_dirs=[],
+                 # Mount GCS docs bucket into /gcs
+                 mount_docs=False,
                  **kwargs):
 
-        # NOTE: There is a limitation to the GCS Fuse that it
-        # waits 30 seconds after a pod terminates.
-        #
-        # This delay is removed in the gcs-fuse-csi-driver but may not yet
-        # be available in Composer and GKE Autopilot:
-        # https://github.com/GoogleCloudPlatform/gcs-fuse-csi-driver/issues/91#issuecomment-1886185228
-        if doc_dirs:
+        if mount_docs:
 
             # Initialize these values in kwargs
             kwargs.setdefault('annotations', {})
@@ -72,19 +66,11 @@ class ComposerPodOperator(KubernetesPodOperator):
                     },
                 )
             ))
-
-            # Path in the docs bucket for the files
-            sub_path = ('{{ dag_run.dag_id }}/{{ task.task_id }}' +
-                        '/{{ execution_date | ts }}')
-
-            # Add in the docs bucket volume
-            for doc_dir in doc_dirs:
-                kwargs['volume_mounts'].append(V1VolumeMount(
-                    name="docs-bucket",
-                    mount_path=doc_dir,
-                    sub_path=sub_path + doc_dir,
-                    read_only=False,
-                ))
+            kwargs['volume_mounts'].append(V1VolumeMount(
+                name="docs-bucket",
+                mount_path='/gcs',
+                read_only=False,
+            ))
 
         super().__init__(
 
@@ -114,7 +100,6 @@ class DBTComposerPodOperator(ComposerPodOperator):
     def __init__(self,
                  env_vars={},
                  dbt_vars=None,
-                 doc_dirs=[],
                  capture_docs=True,
                  **kwargs):
 
@@ -139,9 +124,24 @@ class DBTComposerPodOperator(ComposerPodOperator):
                 '{{ var.value.REGION }}',
             'DBT_ENV_CUSTOM_ENV_BQ_LOCATION':
                 '{{ var.value.BQ_LOCATION }}',
-            'DBT_ENV_CUSTOM_ENV_GCS_DOCS_BUCKET':
-                '{{ var.value.GCS_DOCS_BUCKET }}',
         })
+
+        # If capturing docs specify the DBT_LOG_PATH and DBT_TARGET_PATH
+        # accordingly.
+        #
+        # The GCS_DOCS_BUCKET is for the dashboard to point to the bucket.
+        #
+        if capture_docs:
+            env_vars.update({
+                'DBT_ENV_CUSTOM_ENV_GCS_DOCS_BUCKET':
+                    '{{ var.value.GCS_DOCS_BUCKET }}',
+                'DBT_LOG_PATH': ('/gcs/{{ dag_run.dag_id }}/' +
+                                 '{{ task.task_id }}/' +
+                                 '{{ execution_date | ts }}/dbt/logs'),
+                'DBT_TARGET_PATH': ('/gcs/{{ dag_run.dag_id }}/' +
+                                    '{{ task.task_id }}/' +
+                                    '{{ execution_date | ts }}/dbt/target'),
+            })
 
         # Add generic Airflow environment variables
         env_vars.update({
@@ -155,13 +155,7 @@ class DBTComposerPodOperator(ComposerPodOperator):
                 '{{ execution_date | ts }}',
         })
 
-        if capture_docs:
-            doc_dirs = doc_dirs + [
-                '/dbt/target',
-                '/dbt/logs',
-            ]
-
         super().__init__(
             env_vars=env_vars,
-            doc_dirs=doc_dirs,
+            mount_docs=capture_docs,
             **kwargs)

@@ -17,17 +17,17 @@
 
 output "airflow_uri" {
   description = "Airflow URI"
-  value       = google_composer_environment.composer_env.config[0].airflow_uri
+  value       = local.airflow_uri
 }
 
 output "airflow_dag_gcs_prefix" {
   description = "Airflow GCS DAG prefix"
-  value       = google_composer_environment.composer_env.config[0].dag_gcs_prefix
+  value       = local.airflow_dag_gcs_prefix
 }
 
 output "airflow_gke_cluster" {
   description = "Airflow GKE Cluster"
-  value       = google_composer_environment.composer_env.config[0].gke_cluster
+  value       = local.airflow_gke_cluster
 }
 
 output "docs_gcs_bucket" {
