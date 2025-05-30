@@ -19,6 +19,11 @@ output "project_id" {
   value       = var.project_id
 }
 
+output "region" {
+  description = "Region for Composer and BigQuery"
+  value       = var.region
+}
+
 output "airflow_uri" {
   description = "Airflow URI for the web interface"
   value       = module.dbt_composer.airflow_uri
@@ -42,4 +47,9 @@ output "registry_url" {
 output "lookerstudio_create_dashboard_url" {
   description = "Lookerstudio template dashboard"
   value       = module.dbt_composer.lookerstudio_create_dashboard_url
+}
+
+output "composer_service_account" {
+  description = "Composer Service Account"
+  value       = module.dbt_composer.composer_service_account
 }

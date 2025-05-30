@@ -45,6 +45,8 @@ module "composer_service_account" {
     "${module.project_services.project_id}=>roles/iam.serviceAccountUser",
     "${module.project_services.project_id}=>roles/bigquery.dataEditor",
     "${module.project_services.project_id}=>roles/bigquery.jobUser",
+    "${module.project_services.project_id}=>roles/run.jobsExecutorWithOverrides",
+    "${module.project_services.project_id}=>roles/run.viewer",
   ]
 }
 
