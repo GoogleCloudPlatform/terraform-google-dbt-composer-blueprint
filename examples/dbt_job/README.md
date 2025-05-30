@@ -8,7 +8,7 @@ To deploy this example do the following from a Linux command line:
 
 1. Run `terraform init`.
 
-2. Create a `terraform.tfvars` to provide values for `project_id`, `region`, `bq_location`, and `gcs_location`. Region is used for Cloud Composer and the artifact repository. BQ Location is used for the BigQuery storage location. GCS Location is used for the location of GCS buckets (multi-regional or single region).
+2. Create a `terraform.tfvars` to provide values for `project_id`, `region`, `bq_location`, `gcs_location`, and `composer_version`. Region is used for Cloud Composer, the artifact repository, and Cloud Run (if used). BQ Location is used for the BigQuery storage location. GCS Location is used for the location of GCS buckets (multi-regional or single region).
 
 An example terraform.tfvars is as follows:
 ```
@@ -37,7 +37,7 @@ echo "Airflow is available at $(terraform output -raw airflow_uri)"
 echo "Create your own dashboard is available at $(terraform output -raw lookerstudio_create_dashboard_url)"
 ```
 
-2. Build and deploy the example DBT job:
+2. Build and deploy the example DBT GKE job:
 ```
 gcloud builds submit --project $PROJECT_ID --substitutions "_SOURCE_URL=BaseSourceUrl,_REGISTRY_URL=${REGISTRY_URL},_AIRFLOW_DAG_GCS_PREFIX=${AIRFLOW_DAG_GCS_PREFIX}" .
 ```
@@ -50,7 +50,7 @@ For example, if you were to refer to the public github repository you would use 
 gcloud builds submit --project $PROJECT_ID --substitutions "_SOURCE_URL=https://github.com/GoogleCloudPlatform/terraform-google-dbt-composer-blueprint/tree/main,_REGISTRY_URL=${REGISTRY_URL},_AIRFLOW_DAG_GCS_PREFIX=${AIRFLOW_DAG_GCS_PREFIX}" .
 ```
 
-3. OPTIONAL: Create the Cloud Run Job:
+3. (OPTIONAL) Create the Cloud Run Job:
 
 Export more environment variables with the following command.
 ```
