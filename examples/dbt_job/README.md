@@ -19,7 +19,7 @@ project_id="<your project-id>"
 region="europe-west1"
 bq_location="EU"
 gcs_location="eu"
-# For example, use composer-2.13.1-airflow-2.10.5 or composer-3-airflow-2.10-5-build.3
+# For example, use composer-2.13.1-airflow-2.10.5 or composer-3-airflow-2.10.5
 composer_version="composer-2.13.1-airflow-2.10.5"
 ```
 
@@ -60,9 +60,10 @@ export SERVICE_ACCOUNT=$(terraform output -raw composer_service_account)
 ```
 
 Create the job. Note that you will need to enable the API, and may need to re-run
-the command line.
+the command line a few times.
+
 ```
-gcloud run jobs update example-dbt-run-job \
+gcloud run jobs create example-dbt-run-job \
   --project=${PROJECT_ID} \
   --region=${REGION} \
   --image=${REGISTRY_URL}/example-dbt-job:latest \
@@ -77,6 +78,7 @@ gcloud run jobs update example-dbt-run-job \
 
 The DBT dag deployed in step 2 should have already run and you can inspect its
 logs and status. If you created the Cloud Run Job, you can manually run the run dag.
+In the logs there will be links into Cloud Run.
 
 5. Visit the Looker Studio dashboard URL shown in step 1. This should enable you to save a new dashboard pointing at your newly created DBT Composer environment.
 

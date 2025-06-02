@@ -31,6 +31,7 @@ module "project_services" {
     "serviceusage.googleapis.com",
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
+    "compute.googleapis.com",
   ]
 }
 
