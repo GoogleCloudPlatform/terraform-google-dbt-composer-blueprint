@@ -17,17 +17,17 @@
 
 output "airflow_uri" {
   description = "Airflow URI"
-  value       = google_composer_environment.composer_env.config[0].airflow_uri
+  value       = local.airflow_uri
 }
 
 output "airflow_dag_gcs_prefix" {
   description = "Airflow GCS DAG prefix"
-  value       = google_composer_environment.composer_env.config[0].dag_gcs_prefix
+  value       = local.airflow_dag_gcs_prefix
 }
 
 output "airflow_gke_cluster" {
   description = "Airflow GKE Cluster"
-  value       = google_composer_environment.composer_env.config[0].gke_cluster
+  value       = local.airflow_gke_cluster
 }
 
 output "docs_gcs_bucket" {
@@ -38,4 +38,9 @@ output "docs_gcs_bucket" {
 output "lookerstudio_create_dashboard_url" {
   description = "Looker Studio template dashboard"
   value       = "https://lookerstudio.google.com/reporting/create?c.reportId=1e0b060b-064a-4266-b115-e224da42689f&c.reportName=MyNewReport&ds.dbt_jobs.projectId=${var.project_id}&ds.dbt_jobs.billingProjectId=${var.project_id}&ds.dbt_jobs.type=TABLE&ds.dbt_jobs.datasetId=${var.monitoring_dataset}&ds.dbt_jobs.tableId=dbt_jobs"
+}
+
+output "composer_service_account" {
+  description = "Composer Service Account"
+  value       = module.composer_service_account.email
 }

@@ -20,12 +20,18 @@ from dag_utils.tools import DBTComposerPodOperator
 from airflow.models import Param
 from airflow.decorators import dag
 
+
 # Pull repo from the environment
 REPO = os.getenv('AIRFLOW_VAR_REPO')
 
+# Pull Composer version. Composer v3 cannot capture docs with GKE.
+COMPOSER_VER = os.getenv('AIRFLOW_VAR_COMPOSER_VER')
+
 
 #
-# Main dag
+# Run on GKE Cluster in Composer.
+#
+# For Composer v3 this does not support mounting GCS buckets.
 #
 @dag(
     schedule_interval='@daily',
@@ -42,20 +48,20 @@ REPO = os.getenv('AIRFLOW_VAR_REPO')
         ),
     },
 )
-def example_dbt_dag():
+def example_dbt_gke_dag():
 
     # Launch the job, optionally parameterising it from different
     # repo and tag.
     DBTComposerPodOperator(
-        name='example_dbt_job',
-        task_id='example_dbt_job',
+        name='example_dbt_gke_job',
+        task_id='example_dbt_gke_job',
+        capture_docs=COMPOSER_VER == 'v2',
         image='{{ params.repo }}/example-dbt-job:{{ params.tag }}',
         cmds=[
             "/bin/bash",
             "-xc",
             "&&".join([
                 "dbt run",
-                # NOTE: --static requires version DBT 1.7+
                 "dbt docs generate --static",
             ]),
         ],
@@ -65,4 +71,4 @@ def example_dbt_dag():
     )
 
 
-example_dbt_dag()
+example_dbt_gke_dag()

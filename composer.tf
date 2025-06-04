@@ -1,4 +1,4 @@
-# Copyright 2023 The Reg Reporting Blueprint Authors
+# Copyright 2025 The Reg Reporting Blueprint Authors
 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,13 +17,23 @@ locals {
   gcs_docs_bucket               = module.gcs_docs_bucket.buckets_map["docs"].name
   cluster_secondary_range_name  = "composer-subnet-cluster"
   services_secondary_range_name = "composer-subnet-services"
+  composer_version_v2           = startswith(var.composer_version, "composer-2")
+  airflow_uri = (local.composer_version_v2 ?
+    google_composer_environment.composer_env_v2[0].config[0].airflow_uri :
+    google_composer_environment.composer_env_v3[0].config[0].airflow_uri)
+  airflow_dag_gcs_prefix = (local.composer_version_v2 ?
+    google_composer_environment.composer_env_v2[0].config[0].dag_gcs_prefix :
+    google_composer_environment.composer_env_v3[0].config[0].dag_gcs_prefix)
+  airflow_gke_cluster = (local.composer_version_v2 ?
+    google_composer_environment.composer_env_v2[0].config[0].gke_cluster :
+    google_composer_environment.composer_env_v3[0].config[0].gke_cluster)
 }
 
 # Create a Cloud Composer specific service account
 # See https://github.com/terraform-google-modules/terraform-google-service-accounts
 module "composer_service_account" {
   source  = "terraform-google-modules/service-accounts/google"
-  version = "4.2.1"
+  version = "4.5.4"
 
   project_id = module.project_services.project_id
   prefix     = local.env_name
@@ -35,6 +45,8 @@ module "composer_service_account" {
     "${module.project_services.project_id}=>roles/iam.serviceAccountUser",
     "${module.project_services.project_id}=>roles/bigquery.dataEditor",
     "${module.project_services.project_id}=>roles/bigquery.jobUser",
+    "${module.project_services.project_id}=>roles/run.jobsExecutorWithOverrides",
+    "${module.project_services.project_id}=>roles/run.viewer",
   ]
 }
 
@@ -42,7 +54,7 @@ module "composer_service_account" {
 # See https://github.com/terraform-google-modules/terraform-google-network
 module "vpc" {
   source  = "terraform-google-modules/network/google"
-  version = "7.3.0"
+  version = "11.1.0"
 
   project_id   = module.project_services.project_id
   network_name = "${local.env_name}-network"
@@ -69,22 +81,55 @@ module "vpc" {
   }
 }
 
-# Create Composer 2 environment.
-resource "google_composer_environment" "composer_env" {
+# Create Composer 3 environment.
+resource "google_composer_environment" "composer_env_v3" {
+  count = local.composer_version_v2 ? 0 : 1
+
   project = module.project_services.project_id
-  name    = local.env_name
+  name    = "${local.env_name}-v3"
   region  = var.region
 
   labels = {
     goog-packaged-solution = var.goog_packaged_solution
   }
 
-  # Tags and such can be filled in. Ignore changes after creation.
-  lifecycle {
-    ignore_changes = [
-      # config["software_config"],
-      # config["node_config"]
-    ]
+  config {
+    enable_private_environment = true
+    software_config {
+      image_version = var.composer_version
+      env_variables = merge(tomap({
+        AIRFLOW_VAR_PROJECT_ID      = module.project_services.project_id
+        AIRFLOW_VAR_REGION          = var.region
+        AIRFLOW_VAR_BQ_LOCATION     = var.bq_location
+        AIRFLOW_VAR_GCS_DOCS_BUCKET = local.gcs_docs_bucket
+        AIRFLOW_VAR_COMPOSER_VER    = "v3"
+        }),
+        var.env_variables,
+      )
+    }
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
+    node_config {
+      network         = module.vpc.network_id
+      subnetwork      = module.vpc.subnets["${var.region}/composer-subnet"].id
+      service_account = module.composer_service_account.email
+      ip_allocation_policy {
+        cluster_secondary_range_name  = local.cluster_secondary_range_name
+        services_secondary_range_name = local.services_secondary_range_name
+      }
+    }
+  }
+}
+
+# Create Composer 2 environment.
+resource "google_composer_environment" "composer_env_v2" {
+  count = local.composer_version_v2 ? 1 : 0
+
+  project = module.project_services.project_id
+  name    = "${local.env_name}-v2"
+  region  = var.region
+
+  labels = {
+    goog-packaged-solution = var.goog_packaged_solution
   }
 
   config {
@@ -99,6 +144,7 @@ resource "google_composer_environment" "composer_env" {
         AIRFLOW_VAR_REGION          = var.region
         AIRFLOW_VAR_BQ_LOCATION     = var.bq_location
         AIRFLOW_VAR_GCS_DOCS_BUCKET = local.gcs_docs_bucket
+        AIRFLOW_VAR_COMPOSER_VER    = "v2"
         }),
         var.env_variables,
       )
@@ -130,10 +176,10 @@ resource "google_storage_bucket_object" "dag_helpers" {
   detect_md5hash = true
   source         = "${path.module}/${each.value}"
   name = format("%s/%s",
-    regex("^gs://[^/]*/(.*)*", google_composer_environment.composer_env.config[0].dag_gcs_prefix)[0],
+    regex("^gs://[^/]*/(.*)*", local.airflow_dag_gcs_prefix)[0],
     each.value
   )
-  bucket = regex("^gs://([^/]*)/", google_composer_environment.composer_env.config[0].dag_gcs_prefix)[0]
+  bucket = regex("^gs://([^/]*)/", local.airflow_dag_gcs_prefix)[0]
 }
 
 

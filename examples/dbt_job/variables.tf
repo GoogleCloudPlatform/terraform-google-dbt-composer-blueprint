@@ -33,3 +33,8 @@ variable "bq_location" {
   description = "BigQuery dataset location"
   type        = string
 }
+
+variable "composer_version" {
+  description = "Version of Cloud Composer"
+  type        = string
+}

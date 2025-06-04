@@ -23,13 +23,15 @@ locals {
 # The modules/project_services
 module "project_services" {
   source                      = "terraform-google-modules/project-factory/google//modules/project_services"
-  version                     = "14.3.0"
+  version                     = "18.0.0"
   project_id                  = var.project_id
   disable_services_on_destroy = false
   disable_dependent_services  = false
   activate_apis = [
+    "serviceusage.googleapis.com",
     "artifactregistry.googleapis.com",
     "cloudbuild.googleapis.com",
+    "compute.googleapis.com",
   ]
 }
 
@@ -42,13 +44,43 @@ resource "google_artifact_registry_repository" "composer-dbt-repo" {
   description   = "DBT and utility containers"
 }
 
+# Default service account
+data "google_compute_default_service_account" "default" {
+  project = module.project_services.project_id
+  depends_on = [module.project_services]
+}
+
+# Apply permissions to the service account (for Cloud Build)
+resource "google_project_iam_member" "composer-dbt-iam" {
+  project = module.project_services.project_id
+  role    = "roles/storage.objectUser"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+}
+
+# Apply permissions to the service account (for Cloud Build)
+resource "google_project_iam_member" "composer-dbt-iam-2" {
+  project = module.project_services.project_id
+  role    = "roles/artifactregistry.writer"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+}
+
+# Apply permissions to the service account (for Cloud Build)
+resource "google_project_iam_member" "composer-dbt-iam-3" {
+  project = module.project_services.project_id
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${data.google_compute_default_service_account.default.email}"
+}
+
+
 # Create DBT Composer setup
 module "dbt_composer" {
-  source       = "../.."
-  project_id   = module.project_services.project_id
-  region       = var.region
-  gcs_location = var.gcs_location
-  bq_location  = var.bq_location
+  source           = "../.."
+  project_id       = module.project_services.project_id
+  region           = var.region
+  gcs_location     = var.gcs_location
+  bq_location      = var.bq_location
+  composer_version = var.composer_version
+
   env_variables = {
     AIRFLOW_VAR_REPO : local.registry_url,
   }

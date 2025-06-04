@@ -17,7 +17,7 @@
 # Create dataset for monitoring
 module "bigquery_audit" {
   source  = "terraform-google-modules/bigquery/google"
-  version = "7.0.0"
+  version = "10.1.0"
 
   project_id   = module.project_services.project_id
   dataset_id   = var.monitoring_dataset
@@ -36,15 +36,15 @@ resource "google_bigquery_table" "cloudaudit_table" {
   friendly_name = "cloudaudit_googleapis_com_data_access"
   project       = module.project_services.project_id
 
-  labels              = {}
-  schema              = file("${path.module}/audit_schema.json")
-  deletion_protection = false
+  labels                   = {}
+  schema                   = file("${path.module}/audit_schema.json")
+  deletion_protection      = false
+  require_partition_filter = false
 
   time_partitioning {
     type                     = "DAY"
     expiration_ms            = null
     field                    = "timestamp"
-    require_partition_filter = false
   }
 
   lifecycle {

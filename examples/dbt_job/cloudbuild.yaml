@@ -38,9 +38,9 @@ steps:
                    'dbt' ]
 
 # Copy DAGs into airflow
-- name: 'gcr.io/cloud-builders/gsutil'
-  args: [ 'cp', 'dags/*.py',
-                '$_AIRFLOW_DAG_GCS_PREFIX' ]
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  args: [ 'gsutil', 'cp', 'dags/*.py',
+          '$_AIRFLOW_DAG_GCS_PREFIX' ]
 
 images: [ '$_IMAGE_TAG' ]
 
