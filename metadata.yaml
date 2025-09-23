@@ -46,7 +46,7 @@ spec:
       - name: composer_version
         description: Version of Cloud Composer
         varType: string
-        defaultValue: composer-2.4.6-airflow-2.6.3
+        defaultValue: composer-2.14.2-airflow-2.10.5
       - name: env_variables
         description: Variables of the airflow environment.
         varType: map(string)
