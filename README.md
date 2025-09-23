@@ -55,7 +55,7 @@ module "dbt_composer" {
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | bq\_location | The BQ location where the datasets will be created | `string` | n/a | yes |
-| composer\_version | Version of Cloud Composer | `string` | `"composer-2.4.6-airflow-2.6.3"` | no |
+| composer\_version | Version of Cloud Composer | `string` | `"composer-2.14.2-airflow-2.10.5"` | no |
 | env\_variables | Variables of the airflow environment. | `map(string)` | `{}` | no |
 | gcs\_location | The GCS location where the buckets will be created | `string` | n/a | yes |
 | goog\_packaged\_solution | Google packaged solution label | `string` | `"gcp-dbt-composer"` | no |
@@ -89,7 +89,7 @@ The following dependencies must be available:
 This blueprint also requires a recent version of Cloud Composer and DBT:
 
 - DBT 1.7+ for the --static documentation generation
-- composer-2.5.2-airflow-2.5.3 or above (due to apache-airflow-providers-cncf-kubernetes 7.8+ for rendering of KubernetesOperator V1VolumeMount)
+- composer-2.14.2-airflow-2.9.3 or above (due to apache-airflow-providers-cncf-kubernetes 7.8+ for rendering of KubernetesOperator V1VolumeMount)
 
 ## Contributing
 
