@@ -39,7 +39,7 @@ steps:
 
 # Copy DAGs into airflow
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  args: [ 'gsutil', 'cp', 'dags/*.py',
+  args: [ 'gcloud', 'storage', 'cp', 'dags/*.py',
           '$_AIRFLOW_DAG_GCS_PREFIX' ]
 
 images: [ '$_IMAGE_TAG' ]
