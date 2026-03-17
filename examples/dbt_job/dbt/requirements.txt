@@ -215,7 +215,7 @@ fastjsonschema==2.21.1 \
     --hash=sha256:794d4f0a58f848961ba16af7b9c85a3e88cd360df008c59aac6fc5ae9323b5d4 \
     --hash=sha256:c9e5b7e908310918cf494a434eeb31384dd84a98b57a30bcb1f535015b554667
     # via nbformat
-google-api-core==2.24.2 \
+google-api-core[grpc]==2.24.2 \
     --hash=sha256:810a63ac95f3c441b7c0e43d344e372887f62ce9071ba972eacf32672e072de9 \
     --hash=sha256:81718493daf06d96d6bc76a91c23874dbf2fac0adbbf542831b805ee6e974696
     # via
@@ -252,7 +252,7 @@ google-cloud-aiplatform==1.94.0 \
     --hash=sha256:5429dfaa953eef90e48e16fb2a6be82f26c5d4a9a0e53178fcf6f837b528373e \
     --hash=sha256:cfb198d322133559c076677fbff5b51568ca7759f228c6fc5273e091c2752a41
     # via dbt-bigquery
-google-cloud-bigquery==3.33.0 \
+google-cloud-bigquery[pandas]==3.33.0 \
     --hash=sha256:7e98a3c383c3744e711fe85ce5507fda8c876d6d48b2f131e06bbd4aff87b064 \
     --hash=sha256:a5d306b277341bc308e6b9374c0f781d2382d81743764a4f28146c6dad60bbe2
     # via
@@ -327,7 +327,7 @@ google-resumable-media==2.7.2 \
     # via
     #   google-cloud-bigquery
     #   google-cloud-storage
-googleapis-common-protos==1.70.0 \
+googleapis-common-protos[grpc]==1.70.0 \
     --hash=sha256:0e1b44e0ea153e6594f9f394fef15193a68aaaea2d843f83e2742717ca753257 \
     --hash=sha256:b8bfcca8c25a2bb253e0e0b0adaf8c00773e5e6af6fd92397576680b807e0fd8
     # via
@@ -520,7 +520,7 @@ markupsafe==3.0.2 \
     --hash=sha256:f8b3d067f2e40fe93e1ccdd6b2e1d16c43140e76f02fb1319a05cf2b79d99430 \
     --hash=sha256:fcabf5ff6eea076f859677f5f0b6b5c1a51e70a376b0579e0eadef8db48c6b50
     # via jinja2
-mashumaro==3.14 \
+mashumaro[msgpack]==3.14 \
     --hash=sha256:5ef6f2b963892cbe9a4ceb3441dfbea37f8c3412523f25d42e9b3a7186555f1d \
     --hash=sha256:c12a649599a8f7b1a0b35d18f12e678423c3066189f7bc7bd8dd431c5c8132c3
     # via
@@ -841,9 +841,9 @@ pyarrow==20.0.0 \
     #   db-dtypes
     #   google-cloud-bigquery
     #   pandas-gbq
-pyasn1==0.6.1 \
-    --hash=sha256:0d632f46f2ba09143da3a8afe9e33fb6f92fa2320ab7e886e2d0f7672af84629 \
-    --hash=sha256:6f580d2bdd84365380830acf45550f2511469f673cb4a5ae3857a3170128b034
+pyasn1==0.6.3 \
+    --hash=sha256:697a8ecd6d98891189184ca1fa05d1bb00e2f84b5977c481452050549c8a72cf \
+    --hash=sha256:a80184d120f0864a52a073acc6fc642847d0be408e7c7252f31390c0f4eadcde
     # via
     #   pyasn1-modules
     #   rsa
@@ -1190,12 +1190,6 @@ rsa==4.9.1 \
     --hash=sha256:68635866661c6836b8d39430f97a996acbd61bfa49406748ea243539fe239762 \
     --hash=sha256:e7bdbfdb5497da4c07dfd35530e1a902659db6ff241e39d9953cad06ebd0ae75
     # via google-auth
-setuptools==80.9.0 \
-    --hash=sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922 \
-    --hash=sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c
-    # via
-    #   pandas-gbq
-    #   pydata-google-auth
 shapely==2.1.1 \
     --hash=sha256:04e4c12a45a1d70aeb266618d8cf81a2de9c4df511b63e105b90bfdfb52146de \
     --hash=sha256:0c062384316a47f776305ed2fa22182717508ffdeb4a56d0ff4087a77b2a0f6d \
